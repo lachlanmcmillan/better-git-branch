@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Key::Up => {
                     select_prev(branches.len(), &mut list_state); 
                 }
-                Key::Esc | Key::Char('q') => {
+                Key::Esc | Key::Ctrl('c') | Key::Char('q') => {
                     command = Commands::Exit;
                     break;
                 }
