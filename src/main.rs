@@ -155,7 +155,7 @@ fn git_read_current_branch() -> String {
 fn git_read_branches() -> String {
     // git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format='%(refname:short)'
     let output = Command::new("git")
-        .args(&["for-each-ref", "--count=20", "--format=%(refname:short)"])
+        .args(&["for-each-ref", "--count=20", "--format=%(refname:short)", "refs/heads"])
         .output()
         .expect("failed to call git executable");
 
