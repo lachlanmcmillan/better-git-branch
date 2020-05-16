@@ -1,8 +1,10 @@
 mod util;
 
 use std::io;
-use std::process::Command;
-use crate::util::Events;
+use std::process::{
+    Command,
+    Output
+};
 use tui::{
     backend::TermionBackend,
     widgets::{Text, List, ListState, Block},
@@ -15,29 +17,24 @@ use termion::{
     screen::AlternateScreen
 };
 
+use crate::util::Events;
+
 enum Commands {
     Checkout,
     Exit
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let branches_string: String = git_read_branches();
-    let current_branch: String = git_read_current_branch();
-
-    let branches: Vec<&str> = branches_string
-        .lines()
-        .map(|x| x.trim())
-        .collect(); 
-
-    assert!(!branches.is_empty(), "error: couldn't read branches");
-    assert!(!current_branch.is_empty(), "error: couldn't read current branch");
-
-    // find the current branch
-    let initial_selected_index = branches.iter().position(|x| *x == current_branch);
-    assert!(!initial_selected_index.is_none(), "error: couldn't find current branch in branch list");
+    let (branches, current_branch_index) = match git_read_branches() {
+        Ok(x) => x,
+        Err(e) => {
+            println!("{}", e);
+            return Ok(());
+        }
+    };
 
     let mut list_state = ListState::default();
-    list_state.select(initial_selected_index);
+    list_state.select(current_branch_index);
 
     let command: Commands;
     let events = Events::new();
@@ -54,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             terminal.draw(|mut frame| {
                 let size = frame.size();
 
-                let text_items = branches.iter().map(|x| Text::raw(*x));
+                let text_items = branches.iter().map(|x| Text::raw(x));
 
                 let list = List::new(text_items)
                     .block(Block::default())
@@ -136,33 +133,43 @@ pub fn select_prev(items_len: usize, list_state: &mut ListState) {
     list_state.select(Some(i));
 }
 
-fn git_read_current_branch() -> String {
-    // git rev-parse --abbrev-ref HEAD
-    let output = Command::new("git")
-        .args(&["rev-parse", "--abbrev-ref", "HEAD"])
-        .output()
-        .expect("failed to call git executable");
-
-    if output.status.success() {
-        String::from_utf8(output.stdout).unwrap().trim().to_string()
-    } else {
-        let stderr = String::from_utf8(output.stderr).unwrap();
-        println!("{}", stderr);
-        panic!("fail")
-    }
+fn get_stdout_string(output: Output) -> String {
+    String::from_utf8(output.stdout).unwrap().trim().to_string()
 }
 
-fn git_read_branches() -> String {
+fn get_stderr_string(output: Output) -> String {
+    String::from_utf8(output.stderr).unwrap().trim().to_string()
+}
+
+fn git_read_branches() -> Result<(Vec<String>, Option<usize>), String> {
     // git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format='%(refname:short)'
     let output = Command::new("git")
-        .args(&["for-each-ref", "--count=20", "--format=%(refname:short)", "refs/heads"])
+        .args(&["branch"])
         .output()
         .expect("failed to call git executable");
+   
+    if output.status.success() {
+        let mut branches: Vec<String> = get_stdout_string(output)
+            .lines()
+            .map(|line| line.trim())
+            .map(|line| String::from(line))
+            .collect();
 
-    String::from_utf8(output.stdout)
-        .unwrap()
-        .trim()
-        .to_string()
+        let current_branch_index = branches
+            .iter()
+            .position(|line| line.starts_with('*'));
+        
+        match current_branch_index {
+            Some(index) => {
+                // remove the star from the current branch with a slice
+                branches[index] = String::from(&branches[index][2..]);
+                return Ok((branches, Some(index)))
+            }
+            None => return Ok((branches, current_branch_index))
+        }
+    } else {
+       Err(get_stderr_string(output)) 
+    }
 }
 
 pub fn git_checkout(branch_name: &str) -> String {
