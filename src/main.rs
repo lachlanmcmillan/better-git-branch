@@ -16,22 +16,26 @@ use termion::{
     screen::AlternateScreen
 };
 
+enum Commands {
+    Checkout,
+    Exit
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let branches_string: String = read_branches();
-    let current_branch: String = read_current_branch();
+    let branches_string: String = git_read_branches();
+    let current_branch: String = git_read_current_branch();
 
     let branches: Vec<&str> = branches_string
         .lines()
         .map(|x| x.trim())
         .collect(); 
 
-    assert!(branches.len() > 0, "error: couldn't read branches");
-    assert!(current_branch.len() > 0, "error: couldn't read current branch");
+    assert!(!branches.is_empty(), "error: couldn't read branches");
+    assert!(!current_branch.is_empty(), "error: couldn't read current branch");
 
     // find the current branch
     let initial_selected_index = branches.iter().position(|x| *x == current_branch);
-
-    assert!(initial_selected_index != None, "error: couldn't find current branch in branch list");
+    assert!(!initial_selected_index.is_none(), "error: couldn't find current branch in branch list");
 
     let mut list_state = ListState::default();
     list_state.select(initial_selected_index);
@@ -40,28 +44,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let events = Events::new();
 
     {
+        // set up termion and tui
         let stdout = io::stdout().into_raw_mode()?;
         let stdout = AlternateScreen::from(stdout);
         let backend = TermionBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
-
         terminal.hide_cursor()?;
 
         loop {
-            terminal.draw(|mut f| {
-                let size = f.size();
+            terminal.draw(|mut frame| {
+                let size = frame.size();
 
                 let text_items = branches.iter().map(|x| Text::raw(*x));
 
-                let block = Block::default();
-                    // .style(style);
                 let list = List::new(text_items)
-                    .block(block)
+                    .block(Block::default())
                     .highlight_style(Style::default().fg(Color::Green))
                     .highlight_symbol("* ");
 
-                f.render_stateful_widget(list, size, &mut list_state);
+                frame.render_stateful_widget(list, size, &mut list_state);
             })?;
+
             match events.next()? {
                 Key::Down => {
                     select_next(branches.len(), &mut list_state);
@@ -82,8 +85,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-
-    // return to normal terminal and release alternate screen buffer
+    // as we exit the above block we return to normal terminal and release 
+    // the alternate screen buffer
 
     match command {
         Commands::Checkout => {
@@ -92,26 +95,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Some(x) => {
                     let branch_name = &branches[x];
                     // println!("{}", branch_name); 
-                    let output = checkout(&branch_name);
+                    let output = git_checkout(&branch_name);
                     println!("{}", output.trim_end()); 
                 }
                 None => {
-                    // how do panics work?
-                    panic!("nothing selected? no branches?")
+                    panic!("error: checkout called without a selected branch")
                 }
             }
         }
-        _ => {
-
-        }
+        _ => { }
     }
 
     Ok(())
-}
-
-enum Commands {
-    Checkout,
-    Exit
 }
 
 pub fn select_next(items_len: usize, list_state: &mut ListState) {
@@ -142,7 +137,7 @@ pub fn select_prev(items_len: usize, list_state: &mut ListState) {
     list_state.select(Some(i));
 }
 
-fn read_current_branch() -> String {
+fn git_read_current_branch() -> String {
     // git rev-parse --abbrev-ref HEAD
     let output = Command::new("git")
         .args(&["rev-parse", "--abbrev-ref", "HEAD"])
@@ -158,7 +153,7 @@ fn read_current_branch() -> String {
     }
 }
 
-fn read_branches() -> String {
+fn git_read_branches() -> String {
     // git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format='%(refname:short)'
     let output = Command::new("git")
         .args(&["for-each-ref", "--count=20", "--format=%(refname:short)"])
@@ -171,16 +166,16 @@ fn read_branches() -> String {
         .to_string()
 }
 
-pub fn checkout(branch_name: &str) -> String {
+pub fn git_checkout(branch_name: &str) -> String {
     // git checkout <branch>
     let output = Command::new("git")
         .args(&["checkout", branch_name])
         .output()
         .expect("failed to call git executable");
 
-    // combine stdout and stderr
-    // if you try to checkout the current branch it will return success, but 
-    // print to stderr
+    // if you try to `git checkout` the current branch it will return success, but 
+    // actually print to stderr, so we combine the outputs here to print them for 
+    // the user
     let output_vec = output.stdout.into_iter().chain(output.stderr.into_iter()).collect();
     String::from_utf8(output_vec).unwrap()
 }
