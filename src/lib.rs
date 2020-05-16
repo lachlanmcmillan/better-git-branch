@@ -8,14 +8,13 @@ use termion::input::TermRead;
 /// type is handled in its own thread and returned to a common `Receiver`
 pub struct Events {
     receiver: mpsc::Receiver<Key>,
-    input_handle: thread::JoinHandle<()>,
 }
 
 impl Events {
     pub fn new() -> Events {
         // how is it inferring the correct type here?
         let (sender, receiver) = mpsc::channel();
-        let input_handle = {
+        {
             let sender = sender.clone();
             // what I think is going on here:
             // Spawn a new cpu thread. 'move' means that the thread will take 
@@ -39,7 +38,6 @@ impl Events {
         };
         Events {
             receiver,
-            input_handle,
         }
     }
 
