@@ -2,10 +2,7 @@ mod util;
 
 use std::io;
 use std::process::Command;
-use crate::util::{
-    Event,
-    Events
-};
+use crate::util::Events;
 use tui::{
     backend::TermionBackend,
     widgets::{Text, List, ListState, Block},
@@ -66,27 +63,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 f.render_stateful_widget(list, size, &mut list_state);
             })?;
             match events.next()? {
-                Event::Input(input) => match input {
-                    Key::Down => {
-                        select_next(branches.len(), &mut list_state);
-                    }
-                    Key::Up => {
-                        select_prev(branches.len(), &mut list_state); 
-                    }
-                    Key::Esc | Key::Char('q') => {
-                        command = Commands::Exit;
-                        break;
-                    }
-                    Key::Char('\n') | Key::Char('\r') => {
-                        // attempt checkout
-                        command = Commands::Checkout;
-                        break;
-                    }
-                    _ => {}
+                Key::Down => {
+                    select_next(branches.len(), &mut list_state);
                 }
-                Event::Tick => {
-
+                Key::Up => {
+                    select_prev(branches.len(), &mut list_state); 
                 }
+                Key::Esc | Key::Char('q') => {
+                    command = Commands::Exit;
+                    break;
+                }
+                Key::Char('\n') | Key::Char('\r') => {
+                    // attempt checkout
+                    command = Commands::Checkout;
+                    break;
+                }
+                _ => {}
             }
         }
     }
