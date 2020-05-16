@@ -1,4 +1,4 @@
-mod util;
+mod lib;
 
 use std::io;
 use std::process::{
@@ -17,7 +17,7 @@ use termion::{
     screen::AlternateScreen
 };
 
-use crate::util::Events;
+use crate::lib::Events;
 
 enum Commands {
     Checkout,
