@@ -89,10 +89,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // get the selected item 
             match list_state.selected() {
                 Some(x) => {
-                    let branch_name = &branches[x];
-                    // println!("{}", branch_name); 
-                    let output = git_checkout(&branch_name);
-                    println!("{}", output.trim_end()); 
+                    if list_state.selected() != current_branch_index {
+                        let branch_name = &branches[x];
+                        let output = git_checkout(&branch_name);
+                        println!("{}", output.trim_end()); 
+                    }
                 }
                 None => {
                     panic!("error: checkout called without a selected branch")
