@@ -7,7 +7,6 @@ use tui::{
     backend::TermionBackend,
     widgets::{Text, List, ListState, Block},
     style::{Style, Color},
-    // layout::{Layout, Constraint, Direction},
     Terminal
 };
 use termion::{
