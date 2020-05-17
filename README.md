@@ -15,7 +15,9 @@ Quickly see and change branches in your repo.
 
 ## Building
 
-...
+```
+cargo build --release
+```
 
 ## Roadmap
 
