@@ -9,9 +9,9 @@ Quickly see and change branches in your repo.
 
 ## Usage
 
-Up/Down arrows - navigate the list
-Enter - checkout branch
-Q - exit
+- Up/Down arrows - navigate the list
+- Enter - checkout branch
+- Q - exit
 
 ## Building
 
@@ -19,5 +19,5 @@ Q - exit
 
 ## Roadmap
 
-[ ] show options at the bottom of the screen
-[ ] support -a to show remote branches
+- [ ] show options at the bottom of the screen
+- [ ] support -a to show remote branches
