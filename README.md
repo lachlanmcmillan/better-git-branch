@@ -9,7 +9,9 @@ Quickly see and change branches in your repo.
 
 ## Usage
 
-...
+Up/Down arrows - navigate the list
+Enter - checkout branch
+Q - exit
 
 ## Building
 
