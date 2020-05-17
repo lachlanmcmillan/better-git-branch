@@ -14,3 +14,7 @@ Quickly see and change branches in your repo.
 ## Building
 
 ...
+
+## Roadmap
+
+[ ] support -a to show remote branches
