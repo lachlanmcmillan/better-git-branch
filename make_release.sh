@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.0.1" # todo read this from cargo.toml
+VERSION="v1.1.0" # todo read this from cargo.toml
 BINARY="./better-git-branch"
 OUTPUT_FILE="better-git-branch-${VERSION}.tar.gz"
 HASH_FILE="better-git-branch-${VERSION}.tar.gz.sha256.txt"
