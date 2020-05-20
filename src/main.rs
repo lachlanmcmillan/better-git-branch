@@ -7,8 +7,9 @@ use std::process::{
 };
 use tui::{
     backend::TermionBackend,
-    widgets::{Text, List, ListState, Block},
-    style::{Style, Color},
+    widgets::{Text, List, ListState, Block, Paragraph},
+    style::{Style, Color, Modifier},
+    layout::{Constraint, Direction, Layout, Alignment},
     Terminal
 };
 use termion::{
@@ -51,6 +52,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             terminal.draw(|mut frame| {
                 let size = frame.size();
 
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .margin(0)
+                    .constraints(
+                        [
+                            Constraint::Min(2),
+                            Constraint::Length(1),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(size);
+
                 let text_items = branches.iter().map(|x| Text::raw(x));
 
                 let list = List::new(text_items)
@@ -58,7 +71,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .highlight_style(Style::default().fg(Color::Green))
                     .highlight_symbol("* ");
 
-                frame.render_stateful_widget(list, size, &mut list_state);
+                let text = [
+                    Text::styled("<Up>/<Down>", Style::default().modifier(Modifier::REVERSED)),
+                    Text::raw(" Navigation   "),
+                    Text::styled("<Enter>", Style::default().modifier(Modifier::REVERSED)),
+                    Text::raw(" Checkout   "),
+                    Text::styled("<Q>", Style::default().modifier(Modifier::REVERSED)),
+                    Text::raw(" Exit"),
+                ];
+
+                let options_text = Paragraph::new(text.iter())
+                    .alignment(Alignment::Left);
+
+                frame.render_stateful_widget(list, chunks[0], &mut list_state);
+                frame.render_widget(options_text, chunks[1]);
             })?;
 
             match events.next()? {
