@@ -3,6 +3,8 @@
 
 Quickly see and change branches in your repo.
 
+![demo-gif](better-git-branch-demo.gif)
+
 ## Installing
 
 ```
