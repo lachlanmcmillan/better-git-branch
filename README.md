@@ -43,5 +43,6 @@ cargo build --release
 
 ## Roadmap
 
-- [ ] show options at the bottom of the screen
+- [x] show options at the bottom of the screen
 - [ ] command-line arguments (-a, -r, -v, --help)
+- [ ] add other related branch actions (delete)
