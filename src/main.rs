@@ -21,6 +21,7 @@ use termion::{
 };
 
 use crate::lib::Events;
+use crate::lib::BranchList;
 
 enum Commands {
     Checkout,
@@ -28,16 +29,13 @@ enum Commands {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (mut branches, mut current_branch_index) = match git_read_branches() {
+    let mut bl: BranchList = match git_read_branches() {
         Ok(x) => x,
         Err(e) => {
             println!("{}", e);
             return Ok(());
         }
     };
-
-    let mut list_state = ListState::default();
-    list_state.select(current_branch_index);
 
     let command: Commands;
     let events = Events::new();
@@ -68,14 +66,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     )
                     .split(size);
 
-                let text_items = branches.iter().map(|x| Text::raw(x));
+                let text_items = bl.branches.iter().map(|x| Text::raw(x));
 
                 let list = List::new(text_items)
                     .block(Block::default())
                     .highlight_style(Style::default().fg(Color::Green))
                     .highlight_symbol(strings::HIGHLIGHT_SYMBOL);
 
-                frame.render_stateful_widget(list, chunks[0], &mut list_state);
+                let mut selected = ListState::default();
+                selected.select(Some(bl.selected_index));
+
+                frame.render_stateful_widget(list, chunks[0], &mut selected);
                 match &command_bar_text {
                     Some(x) => { 
                         commandbar::render_text(chunks[1], &mut frame, &x);
@@ -89,35 +90,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             match events.next()? {
                 Key::Down => {
                     show_actions = false; 
-                    cursor_move_down(branches.len(), &mut list_state);
+                    bl.select_next();
                 }
                 Key::Up => {
                     show_actions = false; 
-                    cursor_move_up(branches.len(), &mut list_state); 
+                    bl.select_prev(); 
                 }
                 Key::Char('a') => {
                     show_actions = !show_actions;
                 }
                 Key::Char('d') => {
                     if show_actions { 
-                        let selected_index: usize = list_state.selected().unwrap();
-                        let delete_current_branch = selected_index == current_branch_index.unwrap();
                         let is_head_detached = false; // TODO
-                        if delete_current_branch || is_head_detached {
+                        if bl.is_current_selected() || is_head_detached {
                             command_bar_text = Some(String::from(strings::DELETE_BRANCH_PROHIBITED));
                             continue;
                         }
-                        let branch_name = &branches[selected_index];
+                        let branch_name = bl.get_selected_branch_name();
                         let output_buff = git_branch_delete(&branch_name);
+                        bl.remove_selected();
                         // print to command bar
                         command_bar_text = Some(output_buff);
-                        // reload branches 
-                        let result = git_read_branches().unwrap();
-                        branches = result.0;
-                        current_branch_index = result.1;
-                        if selected_index > branches.len() {
-                            list_state.select(current_branch_index);
-                        }
                     }
                 }
                 Key::Esc | Key::Ctrl('c') | Key::Char('q') => {
@@ -147,51 +140,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match command {
         Commands::Checkout => {
             // get the selected item 
-            match list_state.selected() {
-                Some(x) => {
-                    if list_state.selected() != current_branch_index {
-                        let branch_name = &branches[x];
-                        let output = git_checkout(&branch_name);
-                        println!("{}", output.trim_end()); 
-                    }
-                }
-                None => {
-                    panic!(strings::PANIC_CHECKOUT)
-                }
+            if !bl.is_current_selected() {
+                let output = git_checkout(bl.get_selected_branch_name());
+                println!("{}", output.trim_end()); 
             }
         }
         _ => { }
     }
 
     Ok(())
-}
-
-pub fn cursor_move_down(items_len: usize, list_state: &mut ListState) {
-    let i = match list_state.selected() {
-        Some(i) => {
-            if i >= items_len -1 {
-                0
-            } else {
-                i + 1
-            }
-        }
-        None => 0,
-    };
-    list_state.select(Some(i));
-}
-
-pub fn cursor_move_up(items_len: usize, list_state: &mut ListState) {
-    let i = match list_state.selected() {
-        Some(i) => {
-            if i == 0 {
-                items_len - 1
-            } else {
-                i - 1
-            }
-        }
-        None => 0,
-    };
-    list_state.select(Some(i));
 }
 
 fn get_stdout_string(output: Output) -> String {
@@ -202,7 +159,7 @@ fn get_stderr_string(output: Output) -> String {
     String::from_utf8(output.stderr).unwrap().trim().to_string()
 }
 
-fn git_read_branches() -> Result<(Vec<String>, Option<usize>), String> {
+fn git_read_branches() -> Result<BranchList, String> {
     // git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format='%(refname:short)'
     let output = Command::new("git")
         .args(&["branch"])
@@ -218,16 +175,17 @@ fn git_read_branches() -> Result<(Vec<String>, Option<usize>), String> {
 
         let current_branch_index = branches
             .iter()
-            .position(|line| line.starts_with('*'));
+            .position(|line| line.starts_with('*'))
+            .unwrap(); // is there a case where this could fail?
         
-        match current_branch_index {
-            Some(index) => {
-                // remove the star from the current branch with a slice
-                branches[index] = String::from(&branches[index][2..]) + " (CURRENT)";
-                return Ok((branches, Some(index)))
-            }
-            None => return Ok((branches, current_branch_index))
-        }
+        // remove the star from the current branch with a slice
+        branches[current_branch_index] = String::from(&branches[current_branch_index][2..]) + " (CURRENT)";
+
+        return Ok(BranchList {
+            branches: branches,
+            selected_index: current_branch_index,
+            current_index: current_branch_index,
+        })
     } else {
        Err(get_stderr_string(output)) 
     }
