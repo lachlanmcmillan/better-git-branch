@@ -16,4 +16,6 @@ cd ./target/release
 tar -czf ${OUTPUT_FILE} ${BINARY}
 
 # hash
-shasum -a 256 ${OUTPUT_FILE} > ${HASH_FILE}
+HASH=`shasum -a 256 ${OUTPUT_FILE}`
+echo "${HASH}" > $HASH_FILE
+
