@@ -1,4 +1,3 @@
-
 # Better Git Branch
 
 Quickly see and change branches in your repo.
@@ -46,5 +45,7 @@ cargo build --release
 ## Roadmap
 
 - [x] show options at the bottom of the screen
+- [x] try making the bottom options different colours
+- [x] display the result of the delete in the command bar
 - [ ] command-line arguments (-a, -r, -v, --help)
-- [ ] add other related branch actions (delete)
+- [ ] add other related branch actions (new, rename)
