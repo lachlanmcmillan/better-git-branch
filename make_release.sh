@@ -2,13 +2,13 @@
 
 set -x
 
-VERSION="v1.2.1" # todo read this from cargo.toml
-BINARY="./better-git-branch"
-OUTPUT_FILE="better-git-branch-${VERSION}.tar.gz"
-HASH_FILE="better-git-branch-${VERSION}.tar.gz.sha256.txt"
-
 # make the binary
 cargo build --release
+
+BINARY="./better-git-branch"
+VERSION="`./target/release/${BINARY} --version`"
+OUTPUT_FILE="better-git-branch-${VERSION}.tar.gz"
+HASH_FILE="better-git-branch-${VERSION}.tar.gz.sha256.txt"
 
 cd ./target/release
 
