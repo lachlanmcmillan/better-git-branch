@@ -1,4 +1,6 @@
 mod lib;
+mod commandbar;
+mod strings;
 
 use std::io;
 use std::process::{
@@ -7,9 +9,9 @@ use std::process::{
 };
 use tui::{
     backend::TermionBackend,
-    widgets::{Text, List, ListState, Block, Paragraph},
-    style::{Style, Color, Modifier},
-    layout::{Constraint, Direction, Layout, Alignment},
+    widgets::{Text, List, ListState, Block},
+    style::{Style, Color},
+    layout::{Constraint, Direction, Layout},
     Terminal
 };
 use termion::{
@@ -26,7 +28,7 @@ enum Commands {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (branches, current_branch_index) = match git_read_branches() {
+    let (mut branches, mut current_branch_index) = match git_read_branches() {
         Ok(x) => x,
         Err(e) => {
             println!("{}", e);
@@ -39,6 +41,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let command: Commands;
     let events = Events::new();
+    let mut show_actions: bool = false;
+    let mut command_bar_text: Option<String> = None;
 
     {
         // set up termion and tui
@@ -69,41 +73,71 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let list = List::new(text_items)
                     .block(Block::default())
                     .highlight_style(Style::default().fg(Color::Green))
-                    .highlight_symbol("* ");
-
-                let text = [
-                    Text::styled("<Up>/<Down>", Style::default().modifier(Modifier::REVERSED)),
-                    Text::raw(" Navigation   "),
-                    Text::styled("<Enter>", Style::default().modifier(Modifier::REVERSED)),
-                    Text::raw(" Checkout   "),
-                    Text::styled("<Q>", Style::default().modifier(Modifier::REVERSED)),
-                    Text::raw(" Exit"),
-                ];
-
-                let options_text = Paragraph::new(text.iter())
-                    .alignment(Alignment::Left);
+                    .highlight_symbol(strings::HIGHLIGHT_SYMBOL);
 
                 frame.render_stateful_widget(list, chunks[0], &mut list_state);
-                frame.render_widget(options_text, chunks[1]);
+                match &command_bar_text {
+                    Some(x) => { 
+                        commandbar::render_text(chunks[1], &mut frame, &x);
+                        // only render it for a single loop
+                        command_bar_text = None;
+                    }
+                    None => commandbar::render(chunks[1], &mut frame, show_actions)
+                }
             })?;
 
             match events.next()? {
                 Key::Down => {
-                    select_next(branches.len(), &mut list_state);
+                    show_actions = false; 
+                    cursor_move_down(branches.len(), &mut list_state);
                 }
                 Key::Up => {
-                    select_prev(branches.len(), &mut list_state); 
+                    show_actions = false; 
+                    cursor_move_up(branches.len(), &mut list_state); 
+                }
+                Key::Char('a') => {
+                    show_actions = !show_actions;
+                }
+                Key::Char('d') => {
+                    if show_actions { 
+                        let selected_index: usize = list_state.selected().unwrap();
+                        let delete_current_branch = selected_index == current_branch_index.unwrap();
+                        let is_head_detached = false; // TODO
+                        if delete_current_branch || is_head_detached {
+                            command_bar_text = Some(String::from(strings::DELETE_BRANCH_PROHIBITED));
+                            continue;
+                        }
+                        let branch_name = &branches[selected_index];
+                        let output_buff = git_branch_delete(&branch_name);
+                        // print to command bar
+                        command_bar_text = Some(output_buff);
+                        // reload branches 
+                        let result = git_read_branches().unwrap();
+                        branches = result.0;
+                        current_branch_index = result.1;
+                        if selected_index > branches.len() {
+                            list_state.select(current_branch_index);
+                        }
+                    }
                 }
                 Key::Esc | Key::Ctrl('c') | Key::Char('q') => {
-                    command = Commands::Exit;
-                    break;
+                    if show_actions || command_bar_text.is_some() { 
+                        show_actions = false;
+                    } else {
+                        command = Commands::Exit;
+                        break;
+                    }
                 }
                 Key::Char('\n') | Key::Char('\r') => {
-                    // attempt checkout
-                    command = Commands::Checkout;
-                    break;
+                    if show_actions { 
+                        show_actions = false; 
+                    } else {
+                        // attempt checkout
+                        command = Commands::Checkout;
+                        break;
+                    }
                 }
-                _ => {}
+                _ => { }
             }
         }
     }
@@ -122,7 +156,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
                 None => {
-                    panic!("error: checkout called without a selected branch")
+                    panic!(strings::PANIC_CHECKOUT)
                 }
             }
         }
@@ -132,7 +166,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn select_next(items_len: usize, list_state: &mut ListState) {
+pub fn cursor_move_down(items_len: usize, list_state: &mut ListState) {
     let i = match list_state.selected() {
         Some(i) => {
             if i >= items_len -1 {
@@ -146,7 +180,7 @@ pub fn select_next(items_len: usize, list_state: &mut ListState) {
     list_state.select(Some(i));
 }
 
-pub fn select_prev(items_len: usize, list_state: &mut ListState) {
+pub fn cursor_move_up(items_len: usize, list_state: &mut ListState) {
     let i = match list_state.selected() {
         Some(i) => {
             if i == 0 {
@@ -173,7 +207,7 @@ fn git_read_branches() -> Result<(Vec<String>, Option<usize>), String> {
     let output = Command::new("git")
         .args(&["branch"])
         .output()
-        .expect("failed to call git executable");
+        .expect(strings::GIT_FAIL);
    
     if output.status.success() {
         let mut branches: Vec<String> = get_stdout_string(output)
@@ -189,7 +223,7 @@ fn git_read_branches() -> Result<(Vec<String>, Option<usize>), String> {
         match current_branch_index {
             Some(index) => {
                 // remove the star from the current branch with a slice
-                branches[index] = String::from(&branches[index][2..]);
+                branches[index] = String::from(&branches[index][2..]) + " (CURRENT)";
                 return Ok((branches, Some(index)))
             }
             None => return Ok((branches, current_branch_index))
@@ -204,11 +238,22 @@ pub fn git_checkout(branch_name: &str) -> String {
     let output = Command::new("git")
         .args(&["checkout", branch_name])
         .output()
-        .expect("failed to call git executable");
+        .expect(strings::GIT_FAIL);
 
     // if you try to `git checkout` the current branch it will return success, but 
     // actually print to stderr, so we combine the outputs here to print them for 
     // the user
     let output_vec = output.stdout.into_iter().chain(output.stderr.into_iter()).collect();
     String::from_utf8(output_vec).unwrap()
+}
+
+pub fn git_branch_delete(branch_name: &str) -> String {
+    let output = Command::new("git")
+        .args(&["branch", "-d", branch_name])
+        .output()
+        .expect(strings::GIT_FAIL);
+
+    let output_vec = output.stdout.into_iter().chain(output.stderr.into_iter()).collect();
+    String::from_utf8(output_vec).unwrap()
+    // no output from git means success here
 }
