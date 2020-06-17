@@ -1,6 +1,6 @@
 [package]
 name = "better-git-branch"
-version = "1.2.0"
+version = "1.2.1"
 authors = ["lachlan mcmillan <lachlanmcmillan@users.noreply.github.com>"]
 edition = "2018"
 
