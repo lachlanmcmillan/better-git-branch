@@ -3,7 +3,6 @@ use std::sync::mpsc;
 use std::thread;
 use termion::event::Key;
 use termion::input::TermRead;
-use tui::widgets::ListState;
 
 /// A small event handler that wrap termion input and tick events. Each event
 /// type is handled in its own thread and returned to a common `Receiver`

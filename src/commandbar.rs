@@ -1,6 +1,6 @@
 use tui::{
     backend::TermionBackend,
-    widgets::{Text, Paragraph, Block, Borders},
+    widgets::{Text, Paragraph},
     style::{Style, Modifier, Color},
     layout::{Alignment},
 };
