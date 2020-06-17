@@ -3,6 +3,7 @@ mod commandbar;
 mod strings;
 
 use std::io;
+use std::env;
 use std::process::{
     Command,
     Output
@@ -23,12 +24,21 @@ use termion::{
 use crate::lib::Events;
 use crate::lib::BranchList;
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 enum Commands {
     Checkout,
     Exit
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 && args[1] == "--version" {
+        println!("v{}", VERSION);
+        return Ok(());
+    }
+
+
     let mut bl: BranchList = match git_read_branches() {
         Ok(x) => x,
         Err(e) => {
