@@ -1,7 +1,7 @@
 use tui::{
     backend::TermionBackend,
     widgets::{Text, Paragraph},
-    style::{Style, Modifier, Color},
+    style::{Style, Color},
     layout::{Alignment},
 };
 
