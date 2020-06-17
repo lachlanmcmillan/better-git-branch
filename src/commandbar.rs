@@ -10,8 +10,8 @@ pub fn render(
   buffer: &mut tui::terminal::Frame<'_, TermionBackend<termion::screen::AlternateScreen<termion::raw::RawTerminal<std::io::Stdout>>>>,
   show_actions: bool
 ) {
-    let style_inverse: tui::style::Style = Style::default().modifier(Modifier::REVERSED);
-    let style_inverse_light: tui::style::Style = Style::default().modifier(Modifier::REVERSED).bg(Color::Gray);
+    let style_inverse: tui::style::Style = Style::default().bg(Color::LightBlue).fg(Color::Black);
+    let style_inverse_light: tui::style::Style = Style::default().bg(Color::LightBlue).fg(Color::White);
 
     let commands_default = [
         Text::styled("↑/↓", style_inverse_light),
@@ -50,7 +50,7 @@ pub fn render_text(
   buffer: &mut tui::terminal::Frame<'_, TermionBackend<termion::screen::AlternateScreen<termion::raw::RawTerminal<std::io::Stdout>>>>,
   text: &str
 ) {
-    let style_inverse: tui::style::Style = Style::default().modifier(Modifier::REVERSED);
+    let style_inverse: tui::style::Style = Style::default().bg(Color::LightBlue).fg(Color::Black);
 
     let text_widget = [
         Text::styled(text, style_inverse)
