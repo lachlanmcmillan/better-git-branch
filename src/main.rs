@@ -117,7 +117,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             continue;
                         }
                         let branch_name = bl.get_selected_branch_name();
-                        let output_buff = git_branch_delete(&branch_name, false);
+                        let output_buff = match git_branch_delete(&branch_name, false) {
+                          Ok(output) => output,
+                          Err(output) => output
+                        };
                         bl.remove_selected();
                         // print to command bar
                         command_bar_text = Some(output_buff);
@@ -197,7 +200,7 @@ fn git_read_branches() -> Result<BranchList, String> {
             current_index: current_branch_index,
         })
     } else {
-       Err(get_stderr_string(output)) 
+        Err(get_stderr_string(output)) 
     }
 }
 
@@ -215,7 +218,7 @@ pub fn git_checkout(branch_name: &str) -> String {
     String::from_utf8(output_vec).unwrap()
 }
 
-pub fn git_branch_delete(branch_name: &str, force: bool) -> String {
+pub fn git_branch_delete(branch_name: &str, force: bool) -> Result<String, String> {
     let option_text = match force {
         true => "-D",
         false => "-d"
@@ -226,6 +229,6 @@ pub fn git_branch_delete(branch_name: &str, force: bool) -> String {
         .expect(strings::GIT_FAIL);
 
     let output_vec = output.stdout.into_iter().chain(output.stderr.into_iter()).collect();
-    String::from_utf8(output_vec).unwrap()
+    Ok(String::from_utf8(output_vec).unwrap())
     // no output from git means success here
 }
