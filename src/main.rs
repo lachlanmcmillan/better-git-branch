@@ -117,7 +117,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             continue;
                         }
                         let branch_name = bl.get_selected_branch_name();
-                        let output_buff = git_branch_delete(&branch_name);
+                        let output_buff = git_branch_delete(&branch_name, false);
                         bl.remove_selected();
                         // print to command bar
                         command_bar_text = Some(output_buff);
@@ -215,9 +215,13 @@ pub fn git_checkout(branch_name: &str) -> String {
     String::from_utf8(output_vec).unwrap()
 }
 
-pub fn git_branch_delete(branch_name: &str) -> String {
+pub fn git_branch_delete(branch_name: &str, force: bool) -> String {
+    let option_text = match force {
+        true => "-D",
+        false => "-d"
+    };
     let output = Command::new("git")
-        .args(&["branch", "-d", branch_name])
+        .args(&["branch", option_text, branch_name])
         .output()
         .expect(strings::GIT_FAIL);
 
