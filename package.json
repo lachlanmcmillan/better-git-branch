@@ -1,0 +1,15 @@
+{
+  "name": "better-git-branch",
+  "version": "2.0.0",
+  "type": "module",
+  "bin": {
+    "better-git-branch": "./src/index.ts",
+    "gb": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.14"
+  }
+}
