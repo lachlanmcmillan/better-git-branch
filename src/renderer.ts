@@ -4,9 +4,7 @@ import {
   write,
   moveTo,
   clearScreen,
-  green,
   RESET,
-  FG_GREEN,
   FG_BLACK,
   FG_WHITE,
   BG_BLUE,
@@ -45,7 +43,7 @@ function renderBranchList(
     moveTo(i + 1, 1);
 
     if (isSelected) {
-      write(`${FG_GREEN}${HIGHLIGHT_SYMBOL}${branch}${RESET}`);
+      write(`${INVERSE}${HIGHLIGHT_SYMBOL}${branch}${RESET}`);
     } else {
       write(`${NO_HIGHLIGHT_PAD}${branch}`);
     }
