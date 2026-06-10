@@ -11,7 +11,7 @@ import {
   INVERSE,
 } from "./terminal";
 
-const PREFIX_WIDTH = 4; // "*M  " = 4 chars
+const PREFIX_WIDTH = 3; // "M  " = 3 chars
 
 export function renderScreen(
   branchList: BranchList,
@@ -39,12 +39,12 @@ function renderBranchList(
     const branch = branchList.branches[i];
     const isSelected = i === branchList.selectedIndex;
 
-    const current = branch.isCurrent ? "C" : " ";
     const merged = branch.isMerged ? "M" : " ";
-    const prefix = `${current}${merged}  `;
+    const prefix = `${merged}  `;
+    const displayName = branch.isCurrent ? `${branch.name} (CURRENT)` : branch.name;
     const date = branch.lastCommitDate;
-    const gap = Math.max(1, termSize.cols - PREFIX_WIDTH - branch.name.length - date.length);
-    const row = `${prefix}${branch.name}${" ".repeat(gap)}${date}`;
+    const gap = Math.max(1, termSize.cols - PREFIX_WIDTH - displayName.length - date.length);
+    const row = `${prefix}${displayName}${" ".repeat(gap)}${date}`;
 
     moveTo(i + 1, 1);
 
@@ -70,8 +70,8 @@ function renderCommandBar(
     const content =
       `${keyStyle}↑/↓${textStyle}: Navigation, ` +
       `${keyStyle}<Enter>${textStyle}: Checkout, ` +
-      `${keyStyle}<A>${textStyle}: Action, ` +
-      `${keyStyle}<Q>${textStyle}: Exit`;
+      `${keyStyle}<Ctrl+A>${textStyle}: Action, ` +
+      `${keyStyle}<Esc>${textStyle}: Exit`;
     const padding = " ".repeat(
       Math.max(0, termSize.cols - stripAnsi(content).length)
     );

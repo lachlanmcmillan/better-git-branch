@@ -20,6 +20,7 @@ export const KEY_LEFT = `${ESC}[D`;
 export const KEY_RIGHT = `${ESC}[C`;
 export const KEY_ENTER = "\r";
 export const KEY_ESCAPE = ESC;
+export const KEY_CTRL_A = "\x01";
 export const KEY_CTRL_C = "\x03";
 
 export function write(text: string) {

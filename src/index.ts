@@ -16,6 +16,7 @@ import {
   KEY_RIGHT,
   KEY_ENTER,
   KEY_ESCAPE,
+  KEY_CTRL_A,
   KEY_CTRL_C,
 } from "./terminal";
 
@@ -73,7 +74,7 @@ process.stdin.on("data", (data: Buffer) => {
     return;
   }
 
-  if (key === "a") {
+  if (key === KEY_CTRL_A) {
     mode = mode === Mode.Actions ? Mode.Normal : Mode.Actions;
     commandBarText = null;
     render();
@@ -120,7 +121,7 @@ process.stdin.on("data", (data: Buffer) => {
     return;
   }
 
-  if (key === KEY_ESCAPE || key === KEY_CTRL_C || key === "q") {
+  if (key === KEY_ESCAPE || key === KEY_CTRL_C) {
     if (mode === Mode.Actions || commandBarText !== null) {
       mode = Mode.Normal;
       commandBarText = null;
