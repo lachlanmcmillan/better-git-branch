@@ -1,12 +1,12 @@
-export class BranchList {
-  branches: string[];
-  selectedIndex: number;
-  currentIndex: number;
+import type { Branch } from "./types";
 
-  constructor(branches: string[], selectedIndex: number, currentIndex: number) {
+export class BranchList {
+  branches: Branch[];
+  selectedIndex: number;
+
+  constructor(branches: Branch[], selectedIndex: number) {
     this.branches = branches;
     this.selectedIndex = selectedIndex;
-    this.currentIndex = currentIndex;
   }
 
   selectNext() {
@@ -33,10 +33,10 @@ export class BranchList {
   }
 
   isCurrentSelected(): boolean {
-    return this.selectedIndex === this.currentIndex;
+    return this.branches[this.selectedIndex].isCurrent;
   }
 
   getSelectedBranchName(): string {
-    return this.branches[this.selectedIndex];
+    return this.branches[this.selectedIndex].name;
   }
 }

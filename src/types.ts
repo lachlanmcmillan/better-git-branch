@@ -13,3 +13,10 @@ export enum Mode {
   Normal = "Normal",
   Actions = "Actions",
 }
+
+export interface Branch {
+  name: string;
+  isCurrent: boolean;
+  isMerged: boolean;
+  lastCommitDate: string;
+}

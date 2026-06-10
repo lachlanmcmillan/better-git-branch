@@ -11,8 +11,7 @@ import {
   INVERSE,
 } from "./terminal";
 
-const HIGHLIGHT_SYMBOL = "* ";
-const NO_HIGHLIGHT_PAD = "  ";
+const PREFIX_WIDTH = 4; // "*M  " = 4 chars
 
 export function renderScreen(
   branchList: BranchList,
@@ -40,12 +39,19 @@ function renderBranchList(
     const branch = branchList.branches[i];
     const isSelected = i === branchList.selectedIndex;
 
+    const current = branch.isCurrent ? "C" : " ";
+    const merged = branch.isMerged ? "M" : " ";
+    const prefix = `${current}${merged}  `;
+    const date = branch.lastCommitDate;
+    const gap = Math.max(1, termSize.cols - PREFIX_WIDTH - branch.name.length - date.length);
+    const row = `${prefix}${branch.name}${" ".repeat(gap)}${date}`;
+
     moveTo(i + 1, 1);
 
     if (isSelected) {
-      write(`${INVERSE}${HIGHLIGHT_SYMBOL}${branch}${RESET}`);
+      write(`${INVERSE}${row}${RESET}`);
     } else {
-      write(`${NO_HIGHLIGHT_PAD}${branch}`);
+      write(row);
     }
   }
 }
