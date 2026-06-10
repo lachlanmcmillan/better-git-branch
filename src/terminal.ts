@@ -22,6 +22,7 @@ export const KEY_ENTER = "\r";
 export const KEY_ESCAPE = ESC;
 export const KEY_CTRL_A = "\x01";
 export const KEY_CTRL_C = "\x03";
+export const KEY_CTRL_S = "\x13";
 
 export function write(text: string) {
   process.stdout.write(text);

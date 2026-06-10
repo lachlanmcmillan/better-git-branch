@@ -10,7 +10,7 @@ export function gitReadBranches(): BranchList {
     "for-each-ref",
     "--sort=-committerdate",
     "refs/heads/",
-    `--format=%(HEAD)${FIELD_SEPARATOR}%(refname:short)${FIELD_SEPARATOR}%(committerdate:relative)`,
+    `--format=%(HEAD)${FIELD_SEPARATOR}%(refname:short)${FIELD_SEPARATOR}%(committerdate:relative)${FIELD_SEPARATOR}%(committerdate:unix)`,
   ]);
 
   if (refResult.exitCode !== 0) {
@@ -29,22 +29,22 @@ export function gitReadBranches(): BranchList {
   );
 
   const lines = refResult.stdout.toString().trim().split("\n").filter(Boolean);
-  let currentIndex = 0;
 
-  const branches: Branch[] = lines.map((line, i) => {
-    const [head, name, date] = line.split(FIELD_SEPARATOR);
+  const branches: Branch[] = lines.map((line) => {
+    const [head, name, date, timestamp] = line.split(FIELD_SEPARATOR);
     const isCurrent = head.trim() === "*";
-    if (isCurrent) currentIndex = i;
 
     return {
       name,
       isCurrent,
       isMerged: !isCurrent && mergedBranches.has(name),
       lastCommitDate: date,
+      lastCommitTimestamp: parseInt(timestamp, 10),
     };
   });
 
-  return new BranchList(branches, currentIndex);
+  const currentIndex = branches.findIndex((b) => b.isCurrent);
+  return new BranchList(branches, Math.max(0, currentIndex));
 }
 
 export function gitCheckout(branchName: string): string {

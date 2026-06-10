@@ -1,4 +1,4 @@
-import type { Branch } from "./types";
+import { SortOrder, type Branch } from "./types";
 
 export class BranchList {
   branches: Branch[];
@@ -38,5 +38,17 @@ export class BranchList {
 
   getSelectedBranchName(): string {
     return this.branches[this.selectedIndex].name;
+  }
+
+  sort(order: SortOrder) {
+    const selectedName = this.getSelectedBranchName();
+
+    if (order === SortOrder.Alphabetical) {
+      this.branches.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      this.branches.sort((a, b) => b.lastCommitTimestamp - a.lastCommitTimestamp);
+    }
+
+    this.selectedIndex = this.branches.findIndex((b) => b.name === selectedName);
   }
 }

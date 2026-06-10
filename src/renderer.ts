@@ -71,6 +71,7 @@ function renderCommandBar(
       `${keyStyle}↑/↓${textStyle}: Navigation, ` +
       `${keyStyle}<Enter>${textStyle}: Checkout, ` +
       `${keyStyle}<Ctrl+A>${textStyle}: Action, ` +
+      `${keyStyle}<Ctrl+S>${textStyle}: Sort, ` +
       `${keyStyle}<Esc>${textStyle}: Exit`;
     const padding = " ".repeat(
       Math.max(0, termSize.cols - stripAnsi(content).length)

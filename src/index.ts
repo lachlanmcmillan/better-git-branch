@@ -1,7 +1,7 @@
 import { BranchList } from "./branchList";
 import { gitReadBranches, gitCheckout, gitBranchDelete } from "./git";
 import { renderScreen, renderModal } from "./renderer";
-import { Mode, DeleteStatus } from "./types";
+import { Mode, DeleteStatus, SortOrder } from "./types";
 import {
   enterRawMode,
   exitRawMode,
@@ -18,6 +18,7 @@ import {
   KEY_ESCAPE,
   KEY_CTRL_A,
   KEY_CTRL_C,
+  KEY_CTRL_S,
 } from "./terminal";
 
 const VERSION = "2.0.0";
@@ -37,6 +38,7 @@ try {
 }
 
 let mode = Mode.Normal;
+let sortOrder = SortOrder.RecentFirst;
 let commandBarText: string | null = null;
 let checkoutOnExit = false;
 
@@ -76,6 +78,16 @@ process.stdin.on("data", (data: Buffer) => {
 
   if (key === KEY_CTRL_A) {
     mode = mode === Mode.Actions ? Mode.Normal : Mode.Actions;
+    commandBarText = null;
+    render();
+    return;
+  }
+
+  if (key === KEY_CTRL_S) {
+    sortOrder = sortOrder === SortOrder.RecentFirst
+      ? SortOrder.Alphabetical
+      : SortOrder.RecentFirst;
+    branchList.sort(sortOrder);
     commandBarText = null;
     render();
     return;

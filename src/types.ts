@@ -14,9 +14,15 @@ export enum Mode {
   Actions = "Actions",
 }
 
+export enum SortOrder {
+  RecentFirst = "RecentFirst",
+  Alphabetical = "Alphabetical",
+}
+
 export interface Branch {
   name: string;
   isCurrent: boolean;
   isMerged: boolean;
   lastCommitDate: string;
+  lastCommitTimestamp: number;
 }
