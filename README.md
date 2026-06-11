@@ -12,7 +12,7 @@ Requires [Bun](https://bun.sh) >= 1.0.0.
 bun add -g better-git-branch
 ```
 
-Create and alias
+Create an alias
 
 ```
 alias gb="better-git-branch"
