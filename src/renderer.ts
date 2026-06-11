@@ -11,6 +11,7 @@ import {
   FG_WHITE,
   DIM,
   BG_BLUE,
+  BG_YELLOW,
   BOLD,
   INVERSE,
 } from "./terminal";
@@ -84,23 +85,26 @@ function renderCommandBar(
 
   if (mode === Mode.Normal) {
     const content =
-      `${keyStyle}↑/↓${textStyle}: Navigation, ` +
-      `${keyStyle}<Enter>${textStyle}: Checkout, ` +
-      `${keyStyle}<Ctrl+A>${textStyle}: Action, ` +
-      `${keyStyle}<Ctrl+S>${textStyle}: Sort, ` +
-      `${keyStyle}<Esc>${textStyle}: Exit`;
+      `${textStyle}[${keyStyle}^A${textStyle}] Action  ` +
+      `${textStyle}[${keyStyle}^S${textStyle}] Sort  ` +
+      `${textStyle}[${keyStyle}Enter${textStyle}] Checkout  ` +
+      `${textStyle}[${keyStyle}Esc${textStyle}] Exit`;
     const padding = " ".repeat(
       Math.max(0, termSize.cols - stripAnsi(content).length),
     );
     write(`${content}${bg}${padding}${RESET}`);
   } else {
+    const abg = BG_YELLOW;
+    const aKeyStyle = `${abg}${FG_WHITE}`;
+    const aTextStyle = `${abg}${FG_BLACK}`;
     const content =
-      `${keyStyle}<D>${textStyle}: Delete branch, ` +
-      `${keyStyle}<Esc>${textStyle}: Cancel`;
+      `${aTextStyle}[${aKeyStyle}D${aTextStyle}] Delete  ` +
+      `${aTextStyle}[${aKeyStyle}D!${aTextStyle}] Force Delete  ` +
+      `${aTextStyle}[${aKeyStyle}Esc${aTextStyle}] Cancel`;
     const padding = " ".repeat(
       Math.max(0, termSize.cols - stripAnsi(content).length),
     );
-    write(`${content}${bg}${padding}${RESET}`);
+    write(`${content}${abg}${padding}${RESET}`);
   }
 }
 

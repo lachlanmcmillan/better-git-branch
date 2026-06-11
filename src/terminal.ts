@@ -14,6 +14,7 @@ export const FG_BLACK = `${ESC}[30m`;
 export const FG_WHITE = `${ESC}[37m`;
 export const DIM = `${ESC}[2m`;
 export const BG_BLUE = `${ESC}[44m`;
+export const BG_YELLOW = `${ESC}[43m`;
 export const INVERSE = `${ESC}[7m`;
 export const BOLD = `${ESC}[1m`;
 
