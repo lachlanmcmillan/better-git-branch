@@ -1,6 +1,7 @@
+#!/usr/bin/env bun
 import { BranchList } from "./branchList";
 import { gitReadBranches, gitCheckout, gitBranchDelete } from "./git";
-import { renderScreen, renderModal } from "./renderer";
+import { renderScreen } from "./renderer";
 import { Mode, DeleteStatus, SortOrder } from "./types";
 import {
   enterRawMode,
@@ -12,8 +13,6 @@ import {
   getTerminalSize,
   KEY_UP,
   KEY_DOWN,
-  KEY_LEFT,
-  KEY_RIGHT,
   KEY_ENTER,
   KEY_ESCAPE,
   KEY_CTRL_A,
@@ -21,11 +20,12 @@ import {
   KEY_CTRL_S,
 } from "./terminal";
 
-const VERSION = "2.0.0";
+import packageJson from "../package.json";
+
 const DELETE_BRANCH_PROHIBITED = "Error: Cannot delete current branch";
 
 if (process.argv.includes("--version")) {
-  console.log(`v${VERSION}`);
+  console.log(`v${packageJson.version}`);
   process.exit(0);
 }
 
@@ -84,9 +84,10 @@ process.stdin.on("data", (data: Buffer) => {
   }
 
   if (key === KEY_CTRL_S) {
-    sortOrder = sortOrder === SortOrder.RecentFirst
-      ? SortOrder.Alphabetical
-      : SortOrder.RecentFirst;
+    sortOrder =
+      sortOrder === SortOrder.RecentFirst
+        ? SortOrder.Alphabetical
+        : SortOrder.RecentFirst;
     branchList.sort(sortOrder);
     commandBarText = null;
     render();
