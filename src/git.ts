@@ -25,7 +25,7 @@ export function gitReadBranches(): BranchList {
       .trim()
       .split("\n")
       .map((line) => line.replace("*", "").trim())
-      .filter(Boolean)
+      .filter(Boolean),
   );
 
   const lines = refResult.stdout.toString().trim().split("\n").filter(Boolean);
@@ -56,7 +56,7 @@ export function gitCheckout(branchName: string): string {
 
 export function gitBranchDelete(
   branchName: string,
-  force: boolean
+  force: boolean,
 ): DeleteResult {
   const flag = force ? "-D" : "-d";
   const result = Bun.spawnSync(["git", "branch", flag, branchName]);

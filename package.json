@@ -1,15 +1,38 @@
 {
   "name": "better-git-branch",
-  "version": "2.0.0",
+  "version": "1.0.0",
+  "description": "Interactive TUI for navigating and managing git branches",
   "type": "module",
   "bin": {
     "better-git-branch": "./src/index.ts",
     "gb": "./src/index.ts"
   },
+  "files": [
+    "src"
+  ],
   "scripts": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "format": "prettier --write src/"
+  },
+  "keywords": [
+    "git",
+    "branch",
+    "tui",
+    "cli",
+    "terminal"
+  ],
+  "author": "Lachlan McMillan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lachlanmcmillan/better-git-branch.git"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
   },
   "devDependencies": {
-    "bun-types": "^1.3.14"
+    "bun-types": "^1.3.14",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   }
 }

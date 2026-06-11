@@ -40,7 +40,6 @@ try {
 let mode = Mode.Normal;
 let sortOrder = SortOrder.RecentFirst;
 let commandBarText: string | null = null;
-let checkoutOnExit = false;
 
 function render() {
   renderScreen(branchList, mode, commandBarText, getTerminalSize());
@@ -153,7 +152,6 @@ process.stdin.on("data", (data: Buffer) => {
     }
 
     if (!branchList.isCurrentSelected()) {
-      checkoutOnExit = true;
       cleanup();
       const output = gitCheckout(branchList.getSelectedBranchName());
       console.log(output);

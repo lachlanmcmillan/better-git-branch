@@ -17,7 +17,7 @@ export function renderScreen(
   branchList: BranchList,
   mode: Mode,
   commandBarText: string | null,
-  termSize: { rows: number; cols: number }
+  termSize: { rows: number; cols: number },
 ) {
   clearScreen();
   renderBranchList(branchList, termSize);
@@ -31,7 +31,7 @@ export function renderScreen(
 
 function renderBranchList(
   branchList: BranchList,
-  termSize: { rows: number; cols: number }
+  termSize: { rows: number; cols: number },
 ) {
   const availableRows = termSize.rows - 1;
 
@@ -41,9 +41,14 @@ function renderBranchList(
 
     const merged = branch.isMerged ? "M" : " ";
     const prefix = `${merged}  `;
-    const displayName = branch.isCurrent ? `${branch.name} (CURRENT)` : branch.name;
+    const displayName = branch.isCurrent
+      ? `${branch.name} (CURRENT)`
+      : branch.name;
     const date = branch.lastCommitDate;
-    const gap = Math.max(1, termSize.cols - PREFIX_WIDTH - displayName.length - date.length);
+    const gap = Math.max(
+      1,
+      termSize.cols - PREFIX_WIDTH - displayName.length - date.length,
+    );
     const row = `${prefix}${displayName}${" ".repeat(gap)}${date}`;
 
     moveTo(i + 1, 1);
@@ -58,7 +63,7 @@ function renderBranchList(
 
 function renderCommandBar(
   mode: Mode,
-  termSize: { rows: number; cols: number }
+  termSize: { rows: number; cols: number },
 ) {
   moveTo(termSize.rows, 1);
 
@@ -74,7 +79,7 @@ function renderCommandBar(
       `${keyStyle}<Ctrl+S>${textStyle}: Sort, ` +
       `${keyStyle}<Esc>${textStyle}: Exit`;
     const padding = " ".repeat(
-      Math.max(0, termSize.cols - stripAnsi(content).length)
+      Math.max(0, termSize.cols - stripAnsi(content).length),
     );
     write(`${content}${bg}${padding}${RESET}`);
   } else {
@@ -82,7 +87,7 @@ function renderCommandBar(
       `${keyStyle}<D>${textStyle}: Delete branch, ` +
       `${keyStyle}<Esc>${textStyle}: Cancel`;
     const padding = " ".repeat(
-      Math.max(0, termSize.cols - stripAnsi(content).length)
+      Math.max(0, termSize.cols - stripAnsi(content).length),
     );
     write(`${content}${bg}${padding}${RESET}`);
   }
@@ -90,7 +95,7 @@ function renderCommandBar(
 
 function renderCommandBarText(
   text: string,
-  termSize: { rows: number; cols: number }
+  termSize: { rows: number; cols: number },
 ) {
   moveTo(termSize.rows, 1);
   const padding = " ".repeat(Math.max(0, termSize.cols - text.length));
@@ -105,7 +110,7 @@ export function renderModal(
   message: string,
   options: string[],
   selectedOption: number,
-  termSize: { rows: number; cols: number }
+  termSize: { rows: number; cols: number },
 ) {
   const buttonRow = options
     .map((opt, i) => {
@@ -130,21 +135,13 @@ export function renderModal(
   const msgPadLeft = Math.floor((boxWidth - 2 - message.length) / 2);
   const msgPadRight = boxWidth - 2 - message.length - msgPadLeft;
   const msgLine =
-    "│" +
-    " ".repeat(msgPadLeft) +
-    message +
-    " ".repeat(msgPadRight) +
-    "│";
+    "│" + " ".repeat(msgPadLeft) + message + " ".repeat(msgPadRight) + "│";
 
   const btnPlainLen = buttonRowPlain.length;
   const btnPadLeft = Math.floor((boxWidth - 2 - btnPlainLen) / 2);
   const btnPadRight = boxWidth - 2 - btnPlainLen - btnPadLeft;
   const btnLine =
-    "│" +
-    " ".repeat(btnPadLeft) +
-    buttonRow +
-    " ".repeat(btnPadRight) +
-    "│";
+    "│" + " ".repeat(btnPadLeft) + buttonRow + " ".repeat(btnPadRight) + "│";
 
   moveTo(startRow, startCol);
   write(top);

@@ -46,9 +46,13 @@ export class BranchList {
     if (order === SortOrder.Alphabetical) {
       this.branches.sort((a, b) => a.name.localeCompare(b.name));
     } else {
-      this.branches.sort((a, b) => b.lastCommitTimestamp - a.lastCommitTimestamp);
+      this.branches.sort(
+        (a, b) => b.lastCommitTimestamp - a.lastCommitTimestamp,
+      );
     }
 
-    this.selectedIndex = this.branches.findIndex((b) => b.name === selectedName);
+    this.selectedIndex = this.branches.findIndex(
+      (b) => b.name === selectedName,
+    );
   }
 }
