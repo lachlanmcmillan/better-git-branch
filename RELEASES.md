@@ -19,7 +19,7 @@
    ```
    npm publish
    ```
-6. Create a release on github
+6. Create a GitHub release with the latest `CHANGELOG.md` entry as the release notes
 
 ## Verify
 
