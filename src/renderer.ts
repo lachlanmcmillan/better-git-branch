@@ -1,5 +1,5 @@
 import { BranchList } from "./branchList";
-import { Mode } from "./types";
+import { Mode, type Branch } from "./types";
 import {
   write,
   moveTo,
@@ -27,10 +27,11 @@ export function renderScreen(
   clearScreen();
   renderBranchList(branchList, termSize);
 
+  const selectedBranch = branchList.branches[branchList.selectedIndex];
   if (commandBarText !== null) {
     renderCommandBarText(commandBarText, termSize);
   } else {
-    renderCommandBar(mode, termSize);
+    renderCommandBar(mode, selectedBranch, termSize);
   }
 }
 
@@ -75,9 +76,15 @@ function renderBranchList(
 
 function renderCommandBar(
   mode: Mode,
+  selectedBranch: Branch,
   termSize: { rows: number; cols: number },
 ) {
   moveTo(termSize.rows, 1);
+
+  const tags: string[] = [];
+  if (selectedBranch.isMerged) tags.push("MERGED");
+  if (selectedBranch.isWorktree) tags.push("WORKTREE");
+  const rightText = tags.join("  ");
 
   const bg = BG_BLUE;
   const keyStyle = `${bg}${FG_WHITE}`;
@@ -89,10 +96,15 @@ function renderCommandBar(
       `${textStyle}[${keyStyle}^S${textStyle}] Sort  ` +
       `${textStyle}[${keyStyle}Enter${textStyle}] Checkout  ` +
       `${textStyle}[${keyStyle}Esc${textStyle}] Exit`;
-    const padding = " ".repeat(
-      Math.max(0, termSize.cols - stripAnsi(content).length),
-    );
-    write(`${content}${bg}${padding}${RESET}`);
+    const contentLen = stripAnsi(content).length;
+    const rightLen = rightText.length;
+    const available = termSize.cols - contentLen;
+    const showRight = rightLen > 0 && available >= rightLen + 2;
+    const padding = showRight
+      ? " ".repeat(available - rightLen)
+      : " ".repeat(Math.max(0, available));
+    const right = showRight ? `${keyStyle}${rightText}` : "";
+    write(`${content}${bg}${padding}${right}${RESET}`);
   } else {
     const abg = BG_YELLOW;
     const aKeyStyle = `${abg}${FG_WHITE}`;
@@ -101,10 +113,15 @@ function renderCommandBar(
       `${aTextStyle}[${aKeyStyle}D${aTextStyle}] Delete  ` +
       `${aTextStyle}[${aKeyStyle}D!${aTextStyle}] Force Delete  ` +
       `${aTextStyle}[${aKeyStyle}Esc${aTextStyle}] Cancel`;
-    const padding = " ".repeat(
-      Math.max(0, termSize.cols - stripAnsi(content).length),
-    );
-    write(`${content}${abg}${padding}${RESET}`);
+    const contentLen = stripAnsi(content).length;
+    const rightLen = rightText.length;
+    const available = termSize.cols - contentLen;
+    const showRight = rightLen > 0 && available >= rightLen + 2;
+    const padding = showRight
+      ? " ".repeat(available - rightLen)
+      : " ".repeat(Math.max(0, available));
+    const right = showRight ? `${aKeyStyle}${rightText}` : "";
+    write(`${content}${abg}${padding}${right}${RESET}`);
   }
 }
 
