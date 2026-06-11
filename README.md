@@ -47,5 +47,5 @@ $ gb
 | Symbol    | Meaning                      |
 |-----------|------------------------------|
 | (CURRENT) | Currently checked out branch |
-| M         | Branch has been merged       |
+| M         | Merged into current branch   |
 | W         | Branch is used in a worktree |

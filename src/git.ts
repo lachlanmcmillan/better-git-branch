@@ -28,6 +28,15 @@ export function gitReadBranches(): BranchList {
       .filter(Boolean),
   );
 
+  const worktreeResult = Bun.spawnSync(["git", "worktree", "list", "--porcelain"]);
+  const worktreeEntries = worktreeResult.stdout.toString().split("\n\n").slice(1);
+  const worktreeBranches = new Set(
+    worktreeEntries
+      .flatMap((entry) => entry.split("\n"))
+      .filter((line) => line.startsWith("branch "))
+      .map((line) => line.replace("branch refs/heads/", "")),
+  );
+
   const lines = refResult.stdout.toString().trim().split("\n").filter(Boolean);
 
   const branches: Branch[] = lines.map((line) => {
@@ -37,7 +46,8 @@ export function gitReadBranches(): BranchList {
     return {
       name,
       isCurrent,
-      isMerged: !isCurrent && mergedBranches.has(name),
+      isMerged: mergedBranches.has(name) && !isCurrent,
+      isWorktree: worktreeBranches.has(name),
       lastCommitDate: date,
       lastCommitTimestamp: parseInt(timestamp, 10),
     };

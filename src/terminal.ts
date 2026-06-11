@@ -8,8 +8,11 @@ export const CLEAR_SCREEN = `${ESC}[2J`;
 export const RESET = `${ESC}[0m`;
 
 export const FG_GREEN = `${ESC}[32m`;
+export const FG_YELLOW = `${ESC}[33m`;
+export const FG_SOFT_YELLOW = `${ESC}[38;5;222m`;
 export const FG_BLACK = `${ESC}[30m`;
 export const FG_WHITE = `${ESC}[37m`;
+export const DIM = `${ESC}[2m`;
 export const BG_BLUE = `${ESC}[44m`;
 export const INVERSE = `${ESC}[7m`;
 export const BOLD = `${ESC}[1m`;

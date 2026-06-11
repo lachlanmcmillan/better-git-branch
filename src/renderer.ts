@@ -5,13 +5,17 @@ import {
   moveTo,
   clearScreen,
   RESET,
+  FG_GREEN,
+  FG_SOFT_YELLOW,
   FG_BLACK,
   FG_WHITE,
+  DIM,
   BG_BLUE,
+  BOLD,
   INVERSE,
 } from "./terminal";
 
-const PREFIX_WIDTH = 3; // "M  " = 3 chars
+const PREFIX_WIDTH = 4;
 
 export function renderScreen(
   branchList: BranchList,
@@ -39,24 +43,31 @@ function renderBranchList(
     const branch = branchList.branches[i];
     const isSelected = i === branchList.selectedIndex;
 
-    const merged = branch.isMerged ? "M" : " ";
-    const prefix = `${merged}  `;
-    const displayName = branch.isCurrent
-      ? `${branch.name} (CURRENT)`
-      : branch.name;
+    let status = "";
+    if (branch.isMerged) status += "M";
+    if (branch.isWorktree) status += "W";
+    const statusPadded = status.padStart(PREFIX_WIDTH - 1) + " ";
+    const currentSuffix = branch.isCurrent ? " (CURRENT)" : "";
+    const displayName = branch.name + currentSuffix;
     const date = branch.lastCommitDate;
     const gap = Math.max(
       1,
       termSize.cols - PREFIX_WIDTH - displayName.length - date.length,
     );
-    const row = `${prefix}${displayName}${" ".repeat(gap)}${date}`;
 
     moveTo(i + 1, 1);
 
     if (isSelected) {
+      const row = `${statusPadded}${displayName}${" ".repeat(gap)}${date}`;
       write(`${INVERSE}${row}${RESET}`);
     } else {
-      write(row);
+      write(
+        `${FG_SOFT_YELLOW}${statusPadded}${RESET}` +
+        `${branch.name}` +
+        `${FG_GREEN}${currentSuffix}${RESET}` +
+        `${" ".repeat(gap)}` +
+        `${DIM}${date}${RESET}`,
+      );
     }
   }
 }

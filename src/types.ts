@@ -23,6 +23,7 @@ export interface Branch {
   name: string;
   isCurrent: boolean;
   isMerged: boolean;
+  isWorktree: boolean;
   lastCommitDate: string;
   lastCommitTimestamp: number;
 }
