@@ -65,10 +65,10 @@ function renderBranchList(
     } else {
       write(
         `${FG_SOFT_YELLOW}${statusPadded}${RESET}` +
-        `${branch.name}` +
-        `${FG_GREEN}${currentSuffix}${RESET}` +
-        `${" ".repeat(gap)}` +
-        `${DIM}${date}${RESET}`,
+          `${branch.name}` +
+          `${FG_GREEN}${currentSuffix}${RESET}` +
+          `${" ".repeat(gap)}` +
+          `${DIM}${date}${RESET}`,
       );
     }
   }

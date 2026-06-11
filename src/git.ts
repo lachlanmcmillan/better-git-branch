@@ -28,8 +28,16 @@ export function gitReadBranches(): BranchList {
       .filter(Boolean),
   );
 
-  const worktreeResult = Bun.spawnSync(["git", "worktree", "list", "--porcelain"]);
-  const worktreeEntries = worktreeResult.stdout.toString().split("\n\n").slice(1);
+  const worktreeResult = Bun.spawnSync([
+    "git",
+    "worktree",
+    "list",
+    "--porcelain",
+  ]);
+  const worktreeEntries = worktreeResult.stdout
+    .toString()
+    .split("\n\n")
+    .slice(1);
   const worktreeBranches = new Set(
     worktreeEntries
       .flatMap((entry) => entry.split("\n"))
