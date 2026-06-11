@@ -151,12 +151,11 @@ process.stdin.on("data", (data: Buffer) => {
       return;
     }
 
+    cleanup();
     if (!branchList.isCurrentSelected()) {
-      cleanup();
       const output = gitCheckout(branchList.getSelectedBranchName());
       console.log(output);
-      process.exit(0);
     }
-    return;
+    process.exit(0);
   }
 });
